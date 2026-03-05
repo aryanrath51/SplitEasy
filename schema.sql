@@ -1,0 +1,80 @@
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  password TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS groups (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS members (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  group_id INTEGER NOT NULL,
+  name TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (group_id) REFERENCES groups(id)
+);
+
+CREATE TABLE IF NOT EXISTS expenses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  group_id INTEGER NOT NULL,
+  description TEXT NOT NULL,
+  amount REAL NOT NULL,
+  paid_by_member_id INTEGER NOT NULL,
+  expense_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  split_type TEXT DEFAULT 'equal',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (group_id) REFERENCES groups(id),
+  FOREIGN KEY (paid_by_member_id) REFERENCES members(id)
+);
+
+CREATE TABLE IF NOT EXISTS expense_splits (
+  expense_id INTEGER NOT NULL,
+  member_id INTEGER NOT NULL,
+  amount REAL NOT NULL,
+  FOREIGN KEY (expense_id) REFERENCES expenses(id),
+  FOREIGN KEY (member_id) REFERENCES members(id)
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  group_id INTEGER NOT NULL,
+  from_member_id INTEGER NOT NULL,
+  to_member_id INTEGER NOT NULL,
+  amount REAL NOT NULL,
+  payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (group_id) REFERENCES groups(id),
+  FOREIGN KEY (from_member_id) REFERENCES members(id),
+  FOREIGN KEY (to_member_id) REFERENCES members(id)
+);
+
+CREATE TABLE IF NOT EXISTS access_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  group_id INTEGER NOT NULL,
+  user_id TEXT NOT NULL,
+  user_email TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (group_id) REFERENCES groups(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS group_collaborators (
+  group_id INTEGER NOT NULL,
+  user_id TEXT NOT NULL,
+  user_email TEXT NOT NULL,
+  can_edit INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (group_id, user_id),
+  FOREIGN KEY (group_id) REFERENCES groups(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
