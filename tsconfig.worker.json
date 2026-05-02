@@ -2,7 +2,6 @@
   "extends": "./tsconfig.node.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.worker.tsbuildinfo",
-    "ignoreDeprecations": "5.0",
     "types": ["vite/client", "./worker-configuration.d.ts"],
     "noUnusedLocals": false,
     "paths": {
